@@ -297,6 +297,8 @@ export class StreamClientScrcpy
         GoogToolBox.createToolBox(udid, player, this);
         const video = document.createElement('div');
         video.className = 'video';
+        video.style.minHeight = '480px';
+        video.style.minWidth = '208px';
         deviceView.appendChild(video);
         player.setParent(video);
         player.pause();

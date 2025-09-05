@@ -234,10 +234,6 @@ export abstract class StreamClient<T extends ParamsStream> extends BaseClient<T,
         player.on('input-video-resize', this.onInputVideoResize);
 
         document.body.appendChild(deviceView);
-        const bounds = this.getMaxSize(controlButtons);
-        if (bounds) {
-            player.setBounds(bounds);
-        }
         this.player = player;
     }
 
