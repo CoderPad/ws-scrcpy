@@ -30,6 +30,8 @@ import { ACTION } from '../../../common/Action';
 import { StreamReceiverScrcpy } from './StreamReceiverScrcpy';
 import { ParamsDeviceTracker } from '../../../types/ParamsDeviceTracker';
 import { ScrcpyFilePushStream } from '../filePush/ScrcpyFilePushStream';
+import KeyEvent from '../android/KeyEvent';
+import { KeyToCodeMap } from '../KeyToCodeMap';
 
 type StartParams = {
     udid: string;
@@ -339,6 +341,49 @@ export class StreamClientScrcpy
         } else {
             KeyInputHandler.removeEventListener(this);
         }
+    }
+
+    public handleKeyboardEvent(event: any): void {
+        const keyCode = KeyToCodeMap.get(event.code);
+        if (keyCode == null) {
+            return;
+        }
+        let action: typeof KeyEvent.ACTION_DOWN | typeof KeyEvent.ACTION_DOWN;
+        let repeatCount = 0;
+        if (event.type === 'keydown') {
+            action = KeyEvent.ACTION_DOWN;
+            if (event.repeat) {
+                let count = KeyInputHandler.repeatCounter.get(keyCode);
+                if (typeof count !== 'number') {
+                    count = 1;
+                } else {
+                    count++;
+                }
+                repeatCount = count;
+                KeyInputHandler.repeatCounter.set(keyCode, count);
+            }
+        } else if (event.type === 'keyup') {
+            action = KeyEvent.ACTION_UP;
+            KeyInputHandler.repeatCounter.delete(keyCode);
+        } else {
+            return;
+        }
+        const metaState =
+            (event.alt ? KeyEvent.META_ALT_ON : 0) |
+            (event.shift ? KeyEvent.META_SHIFT_ON : 0) |
+            (event.ctrl ? KeyEvent.META_CTRL_ON : 0) |
+            (event.meta ? KeyEvent.META_META_ON : 0) |
+            (event.capsLock ? KeyEvent.META_CAPS_LOCK_ON : 0) |
+            (event.scrollLock ? KeyEvent.META_SCROLL_LOCK_ON : 0) |
+            (event.numLock ? KeyEvent.META_NUM_LOCK_ON : 0);
+
+        const controlMessage: KeyCodeControlMessage = new KeyCodeControlMessage(
+            action,
+            keyCode,
+            repeatCount,
+            metaState,
+        );
+        this.onKeyEvent(controlMessage);
     }
 
     public onKeyEvent(event: KeyCodeControlMessage): void {

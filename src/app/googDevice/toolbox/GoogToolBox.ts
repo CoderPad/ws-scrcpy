@@ -52,6 +52,27 @@ export class GoogToolBox extends ToolBox {
         client: StreamClientScrcpy,
         moreBox?: HTMLElement,
     ): GoogToolBox {
+        window.addEventListener('message', (event) => {
+            if (event.data.type === 'toolbox') {
+                switch (event.data.action) {
+                    case 'power': {
+                        let action = KeyEvent.ACTION_DOWN;
+                        const code = KeyEvent.KEYCODE_POWER;
+                        const message = new KeyCodeControlMessage(action, code, 0, 0);
+                        client.sendMessage(message);
+                        action = KeyEvent.ACTION_UP;
+                        const upMessage = new KeyCodeControlMessage(action, code, 0, 0);
+                        client.sendMessage(upMessage);
+                        break;
+                    }
+                    case 'key': {
+                        client.handleKeyboardEvent(event.data.event);
+                        break;
+                    }
+                }
+            }
+        });
+
         const playerName = player.getName();
         const list = BUTTONS.slice();
         const handler = <K extends keyof HTMLElementEventMap, T extends HTMLElement>(

@@ -7,7 +7,7 @@ export interface KeyEventListener {
 }
 
 export class KeyInputHandler {
-    private static readonly repeatCounter: Map<number, number> = new Map();
+    public static readonly repeatCounter: Map<number, number> = new Map();
     private static readonly listeners: Set<KeyEventListener> = new Set();
     private static handler = (event: Event): void => {
         const keyboardEvent = event as KeyboardEvent;
