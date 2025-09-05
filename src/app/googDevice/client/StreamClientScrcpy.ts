@@ -293,35 +293,11 @@ export class StreamClientScrcpy
 
         const deviceView = document.createElement('div');
         deviceView.className = 'device-view';
-        const stop = (ev?: string | Event) => {
-            if (ev && ev instanceof Event && ev.type === 'error') {
-                console.error(TAG, ev);
-            }
-            let parent;
-            parent = deviceView.parentElement;
-            if (parent) {
-                parent.removeChild(deviceView);
-            }
-            parent = moreBox.parentElement;
-            if (parent) {
-                parent.removeChild(moreBox);
-            }
-            this.streamReceiver.stop();
-            if (this.player) {
-                this.player.stop();
-            }
-        };
 
-        const googMoreBox = (this.moreBox = new GoogMoreBox(udid, player, this));
-        const moreBox = googMoreBox.getHolderElement();
-        googMoreBox.setOnStop(stop);
-        const googToolBox = GoogToolBox.createToolBox(udid, player, this, moreBox);
-        this.controlButtons = googToolBox.getHolderElement();
-        deviceView.appendChild(this.controlButtons);
+        GoogToolBox.createToolBox(udid, player, this);
         const video = document.createElement('div');
         video.className = 'video';
         deviceView.appendChild(video);
-        deviceView.appendChild(moreBox);
         player.setParent(video);
         player.pause();
 
