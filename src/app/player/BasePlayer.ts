@@ -5,6 +5,7 @@ import Size from '../Size';
 import Util from '../Util';
 import { TypedEmitter } from '../../common/TypedEmitter';
 import { DisplayInfo } from '../DisplayInfo';
+import WaitingPNG from '../../public/images/skin/waiting.png';
 
 interface BitrateStat {
     timestamp: number;
@@ -63,6 +64,7 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
     protected videoSettings: VideoSettings;
     protected parentElement?: HTMLElement;
     protected touchableCanvas: HTMLCanvasElement;
+    protected waitingElement: HTMLImageElement;
     protected inputBytes: BitrateStat[] = [];
     protected perSecondQualityStats?: FramesPerSecondStats;
     protected momentumQualityStats?: PlaybackQuality;
@@ -111,11 +113,17 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
         protected tag: HTMLElement = document.createElement('div'),
     ) {
         super();
+        this.waitingElement = new Image();
+        this.waitingElement.className = 'waiting-layer';
+        this.waitingElement.src = WaitingPNG;
+        this.waitingElement.width = 208;
+        this.waitingElement.height = 480;
         this.touchableCanvas = document.createElement('canvas');
         this.touchableCanvas.className = 'touch-layer';
         this.touchableCanvas.oncontextmenu = function (event: MouseEvent): void {
             event.preventDefault();
         };
+        this.setReceivedFirstFrame(false);
         const preferred = this.getPreferredVideoSetting();
         this.videoSettings = BasePlayer.getVideoSettingFromStorage(preferred, this.storageKeyPrefix, udid, displayInfo);
     }
@@ -323,9 +331,29 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
         return this.state;
     }
 
+    private setReceivedFirstFrame(received: boolean) {
+        this.receivedFirstFrame = received;
+
+        if (received) {
+            this.touchableCanvas.style.display = 'block';
+            this.tag.style.display = 'block';
+            this.waitingElement.style.display = 'none';
+            if (this.parentElement) {
+                this.parentElement.style.backgroundColor = 'black';
+            }
+        } else {
+            this.waitingElement.style.display = 'block';
+            if (this.parentElement) {
+                this.parentElement.style.backgroundColor = 'transparent';
+            }
+            this.touchableCanvas.style.display = 'none';
+            this.tag.style.display = 'none';
+        }
+    }
+
     public pushFrame(frame: Uint8Array): void {
         if (!this.receivedFirstFrame) {
-            this.receivedFirstFrame = true;
+            this.setReceivedFirstFrame(true);
             if (typeof this.qualityAnimationId !== 'number') {
                 this.qualityAnimationId = requestAnimationFrame(this.updateQualityStats);
             }
@@ -345,6 +373,7 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
 
     public setParent(parent: HTMLElement): void {
         this.parentElement = parent;
+        parent.appendChild(this.waitingElement);
         parent.appendChild(this.tag);
         parent.appendChild(this.touchableCanvas);
     }
@@ -380,7 +409,7 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
         if (this.needScreenInfoBeforePlay()) {
             this.pause();
         }
-        this.receivedFirstFrame = false;
+        this.setReceivedFirstFrame(false);
         this.screenInfo = screenInfo;
         const { width, height } = screenInfo.videoSize;
         this.touchableCanvas.width = width;
@@ -398,7 +427,7 @@ export abstract class BasePlayer extends TypedEmitter<PlayerEvents> {
     }
 
     protected resetStats(): void {
-        this.receivedFirstFrame = false;
+        this.setReceivedFirstFrame(false);
         this.totalStatsCounter = 0;
         this.totalStats = {
             droppedFrames: 0,

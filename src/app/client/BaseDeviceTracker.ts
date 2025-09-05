@@ -9,6 +9,7 @@ import { HostItem } from '../../types/Configuration';
 import { Tool } from './Tool';
 import Util from '../Util';
 import { EventMap } from '../../common/TypedEmitter';
+import WaitingPNG from '../../public/images/skin/waiting.png';
 
 const TAG = '[BaseDeviceTracker]';
 
@@ -104,6 +105,12 @@ export abstract class BaseDeviceTracker<DD extends BaseDeviceDescriptor, TE exte
     }
 
     protected buildDeviceTable(): void {
+        const waitingElement = new Image();
+        waitingElement.className = 'waiting-layer';
+        waitingElement.src = WaitingPNG;
+        waitingElement.width = 208;
+        waitingElement.height = 480;
+        document.body.appendChild(waitingElement);
         const data = this.descriptors;
         const devices = this.getOrCreateTableHolder();
         const tbody = this.getOrBuildTableBody(devices);
