@@ -16,9 +16,9 @@
 
 
 body.list {
-    height: auto;
-    width: auto;
-    overflow: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 #devices {
@@ -114,6 +114,7 @@ body.list #device_list_menu {
     bottom: 0;
     left: 0;
     width: 100%;
+    display: none;
 }
 
 #devices .device-list {
