@@ -116,6 +116,14 @@ export class DeviceTracker extends BaseDeviceTracker<GoogDeviceDescriptor, never
                 decodeURIComponent(playerFullName),
                 this.params,
             );
+            if (playerCodeName === 'tinyh264') {
+                // The stream may appear in the possible streams just before it is really ready to use
+                setTimeout(() => {
+                    window.location.assign(link.href);
+                    window.location.reload();
+                }, 1000);
+                return;
+            }
             item.appendChild(link);
         });
     }
