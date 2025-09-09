@@ -1,3 +1,14 @@
+# Coderpad specific
+
+This repository is a fork of [NetrisTV/ws-scrcpy](https://github.com/NetrisTV/ws-scrcpy) with the following changes:
+- Reduced UI to only show the video stream
+- Removed all control functionality from the UI
+- Added `postMessage` protocol to use controls from the parent window
+- Added a "wait for device" while waiting for the first stream frame
+- Added an auto select for the video decoder
+
+Rest of the README is unchanged from the original repository.
+
 # ws scrcpy
 
 Web client for [Genymobile/scrcpy][scrcpy] and more.
